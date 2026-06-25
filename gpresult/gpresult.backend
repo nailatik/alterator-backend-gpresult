@@ -1,0 +1,52 @@
+type      = "Backend"
+module    = "executor"
+name      = "gpresult"
+interface = "gpresult1"
+
+[methods.GetOperationSystemName]
+execute            = "/usr/lib/alterator/backends/systeminfo"
+exit_status        = true
+action_id          = "Read"
+stdout_strings     = true
+stderr_strings     = true
+environment.LC_ALL = {}
+
+[methods.GetAllGPOs]
+execute            = "/usr/lib/alterator/backends/gpresult-wrapper all"
+exit_status        = true
+action_id          = "Read"
+stdout_strings     = true
+stderr_strings     = true
+environment.LC_ALL = {}
+
+[methods.GetUserGPOs]
+execute            = "/usr/lib/alterator/backends/gpresult-wrapper user"
+exit_status        = true
+action_id          = "Read"
+stdout_strings     = true
+stderr_strings     = true
+environment.LC_ALL = {}
+
+[methods.GetMachineGPOs]
+execute            = "/usr/lib/alterator/backends/gpresult-wrapper machine"
+exit_status        = true
+action_id          = "Read"
+stdout_strings     = true
+stderr_strings     = true
+environment.LC_ALL = {}
+
+[methods.GetGPObyGUID]
+execute            = "/usr/lib/alterator/backends/gpresult-wrapper gpo_by_guid {guid}"
+exit_status        = true
+action_id          = "Read"
+stdout_strings     = true
+stderr_strings     = true
+environment.LC_ALL = {}
+
+[methods.GetGPObyName]
+execute            = "/usr/lib/alterator/backends/gpresult-wrapper gpo_by_name {name}"
+exit_status        = true
+action_id          = "Read"
+stdout_strings     = true
+stderr_strings     = true
+environment.LC_ALL = {}
