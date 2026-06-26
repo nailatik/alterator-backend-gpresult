@@ -1,0 +1,159 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+import argparse
+import contextlib
+import io
+import json
+import os
+import sys
+
+from gpresult_backend import gpr_init, gpr_system
+from gpresult_backend.GPO import GPO
+
+REDACT_SENSITIVE = True
+SENSITIVE_ATTRS = ("password",)
+
+PROG = "gpresult-wrapper"
+
+
+def die(message, code=1):
+    text = (message or "unknown error").strip()
+    print(f"{PROG}: {text}", file=sys.stderr)
+    sys.exit(code)
+
+
+def load_scope(obj):
+    if obj == "user":
+        path = gpr_system.get_path_to_policy(os.getuid())
+    else:
+        path = gpr_system.get_path_to_policy()
+
+    buf = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(buf):
+            gpr_init.init_data(path, obj)
+    except SystemExit:
+        die(buf.getvalue() or f"failed to read policy database for '{obj}'")
+    except Exception as exc:  # noqa: BLE001 - surface any read/parse failure
+        die(f"failed to read policy database for '{obj}': {exc}")
+
+    leaked = buf.getvalue().strip()
+    if leaked:
+        die(leaked)
+
+
+def serialize_keyvalue(kv):
+    return {
+        "key": kv.key,
+        "value": kv.value,
+        "previous_value": kv.mod_previous_value,
+        "type": kv.type,
+        "is_list": kv.is_list,
+        "reloaded": kv.reloaded,
+    }
+
+
+def serialize_preference(pref):
+    inner = getattr(pref, "preference_obj", None)
+    attributes = {}
+    if inner is not None:
+        attributes = dict(vars(inner))
+        if REDACT_SENSITIVE:
+            for name in SENSITIVE_ATTRS:
+                if attributes.get(name) is not None:
+                    attributes[name] = "***REDACTED***"
+    return {
+        "type": pref.type,
+        "attributes": attributes,
+    }
+
+
+def serialize_gpo(gpo):
+    return {
+        "guid": gpo.guid,
+        "name": gpo.name,
+        "path": gpo.path,
+        "version": gpo.version,
+        "scope": gpo.obj,
+        "keys": [serialize_keyvalue(kv) for kv in gpo.get_sorted_keys_values()],
+        "preferences": [serialize_preference(p) for p in gpo.preferences],
+    }
+
+
+def emit(payload):
+    try:
+        text = json.dumps(payload, ensure_ascii=False, default=str)
+    except (TypeError, ValueError) as exc:
+        die(f"failed to serialize policy data: {exc}")
+    sys.stdout.write(text + "\n")
+    sys.exit(0)
+
+
+def split_by_scope(gpos):
+    buckets = {"user": [], "machine": []}
+    for gpo in gpos:
+        buckets.setdefault(gpo.obj, []).append(serialize_gpo(gpo))
+    return buckets
+
+
+def cmd_all(_args):
+    load_scope("machine")
+    load_scope("user")
+    emit({"all": [serialize_gpo(g) for g in GPO.get_all_gpos()]})
+
+
+def cmd_user(_args):
+    load_scope("user")
+    emit({"user": [serialize_gpo(g) for g in GPO.get_all_gpos("user")]})
+
+
+def cmd_machine(_args):
+    load_scope("machine")
+    emit({"machine": [serialize_gpo(g) for g in GPO.get_all_gpos("machine")]})
+
+
+def cmd_gpo_by_name(args):
+    load_scope("machine")
+    load_scope("user")
+    emit(split_by_scope(GPO.get_gpos_by_name(args.name)))
+
+
+def cmd_gpo_by_guid(args):
+    load_scope("machine")
+    load_scope("user")
+    emit(split_by_scope(GPO.get_gpos_by_guid(args.guid)))
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog=PROG,
+        description="Resultant Set of Policies provider for alterator-manager.",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("all", help="all GPOs, both scopes").set_defaults(func=cmd_all)
+    sub.add_parser("user", help="user-scope GPOs").set_defaults(func=cmd_user)
+    sub.add_parser("machine", help="machine-scope GPOs").set_defaults(func=cmd_machine)
+
+    by_name = sub.add_parser("gpo_by_name", help="GPOs matching a policy name")
+    by_name.add_argument("name")
+    by_name.set_defaults(func=cmd_gpo_by_name)
+
+    by_guid = sub.add_parser("gpo_by_guid", help="GPOs matching a policy GUID")
+    by_guid.add_argument("guid")
+    by_guid.set_defaults(func=cmd_gpo_by_guid)
+
+    return parser
+
+
+def main(argv=None):
+    args = build_parser().parse_args(argv)
+    try:
+        args.func(args)
+    except Exception as exc:  # noqa: BLE001 - never spew a traceback onto the bus
+        die(f"unexpected error: {exc}")
+
+
+if __name__ == "__main__":
+    main()
