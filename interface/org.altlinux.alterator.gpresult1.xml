@@ -1,0 +1,94 @@
+<!DOCTYPE node PUBLIC
+  "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+  "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+  <interface name="org.altlinux.alterator.gpresult1">
+    <doc:summary>Read-only interface exposing Group Policy (gpresult) results over D-Bus.</doc:summary>
+    <doc:detail>
+      All GPO-returning methods deliver a JSON document via stdout_strings.
+
+      Notes:
+      - scope is either "user" or "machine".
+      - previous_value (renamed from mod_previous_value) may be null.
+      - The "password" field is always replaced with "***REDACTED***" before output to prevent GPP credential leakage over the network (cf. MS14-025).
+    </doc:detail>
+
+    <method name="GetOperationSystemName">
+      <doc:summary>Returns OS name and system information from the alterator-systeminfo backend.</doc:summary>
+      <doc:detail>
+        Delegates to the external /usr/lib/alterator/backends/systeminfo binary.
+        The output is NOT gpresult GPO-JSON; its shape is owned by alterator-systeminfo.
+      </doc:detail>
+      <arg type="as" name="stdout_strings" direction="out">
+        <doc:summary>Raw output from alterator-systeminfo; format is defined by that backend.</doc:summary>
+      </arg>
+      <arg type="as" name="stderr_strings" direction="out"/>
+      <arg type="i"  name="response"       direction="out"/>
+    </method>
+
+    <method name="GetAllGPOs">
+      <doc:summary>Returns all applied GPOs for both machine and user scopes.</doc:summary>
+      <arg type="as" name="stdout_strings" direction="out">
+        <doc:summary>JSON envelope: {"all": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+      </arg>
+      <arg type="as" name="stderr_strings" direction="out"/>
+      <arg type="i"  name="response"       direction="out"/>
+    </method>
+
+    <method name="GetUserGPOs">
+      <doc:summary>Returns GPOs applied to the current user scope.</doc:summary>
+      <arg type="as" name="stdout_strings" direction="out">
+        <doc:summary>JSON envelope: {"user": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+      </arg>
+      <arg type="as" name="stderr_strings" direction="out"/>
+      <arg type="i"  name="response"       direction="out"/>
+    </method>
+
+    <method name="GetMachineGPOs">
+      <doc:summary>Returns GPOs applied to the machine scope.</doc:summary>
+      <arg type="as" name="stdout_strings" direction="out">
+        <doc:summary>JSON envelope: {"machine": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+      </arg>
+      <arg type="as" name="stderr_strings" direction="out"/>
+      <arg type="i"  name="response"       direction="out"/>
+    </method>
+
+    <method name="GetGPObyGUID">
+      <doc:summary>Returns GPOs matching the given GUID across both scopes.</doc:summary>
+      <doc:detail>
+        Always searches both user and machine scopes; the client selects the relevant
+        scope from the returned envelope keys.
+      </doc:detail>
+      <arg type="s" name="guid" direction="in">
+        <doc:summary>The GPO GUID to search for (e.g. "31B2F340-016D-11D2-945F-00C04FB984F9").</doc:summary>
+      </arg>
+      <arg type="as" name="stdout_strings" direction="out">
+        <doc:summary>JSON envelope: {"user": [GPO, ...], "machine": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+      </arg>
+      <arg type="as" name="stderr_strings" direction="out"/>
+      <arg type="i"  name="response"       direction="out"/>
+    </method>
+
+    <method name="GetGPObyName">
+      <doc:summary>Returns GPOs matching the given display name across both scopes.</doc:summary>
+      <doc:detail>
+        The caller MUST quote name values
+        (e.g. "Default Domain Policy"), following the same convention as
+        exclude_pkgnames in apt1 -- the executor splits argv on spaces and an
+        unquoted multi-word name would be truncated.
+
+        Always searches both user and machine scopes; the client selects the relevant
+        scope from the returned envelope keys.
+      </doc:detail>
+      <arg type="s" name="name" direction="in">
+        <doc:summary>The GPO display name to search for.</doc:summary>
+      </arg>
+      <arg type="as" name="stdout_strings" direction="out">
+        <doc:summary>JSON envelope: {"user": [GPO, ...], "machine": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+      </arg>
+      <arg type="as" name="stderr_strings" direction="out"/>
+      <arg type="i"  name="response"       direction="out"/>
+    </method>
+
+  </interface>
+</node>
