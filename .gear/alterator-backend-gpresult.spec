@@ -6,7 +6,7 @@ Version: 0.0.1
 Release: alt1
 
 Summary: Alterator backend for reading Group Policy results
-License: GPLv2+
+License: GPLv3+
 Group: System/Configuration/Other
 URL: https://altlinux.space/alterator/alterator-backend-gpresult
 
@@ -64,6 +64,7 @@ install -p -m 644 backend/gpresult.backend %buildroot%_alterator_datadir/backend
 %pyproject_install
 
 %files
+%doc LICENSE.md
 %_alterator_libdir/backends/gpresult-wrapper
 %_alterator_datadir/backends/gpresult.backend
 
