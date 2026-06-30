@@ -58,7 +58,7 @@ install -p -m 644 interface/*.policy %buildroot%_datadir/polkit-1/actions/
 mkdir -p %buildroot%_datadir/dbus-1/interfaces
 install -p -m 644 interface/*.xml %buildroot%_datadir/dbus-1/interfaces/
 mkdir -p %buildroot%_alterator_libdir/backends
-install -p -m 755 scripts/gpresult-wrapper %buildroot%_alterator_libdir/backends/
+install -p -m 755 src/gpresult-wrapper %buildroot%_alterator_libdir/backends/
 mkdir -p %buildroot%_alterator_datadir/backends
 install -p -m 644 backend/gpresult.backend %buildroot%_alterator_datadir/backends/
 %pyproject_install

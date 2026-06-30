@@ -18,7 +18,7 @@ JSON over the [`gpresult1`](./docs/org.altlinux.alterator.gpresult1.md) D-Bus in
 | Component | Path | Role |
 |-----------|------|------|
 | Python library | `src/gpresult_backend/` | Reads GVDB, builds GPO/KeyValue/Preference objects |
-| Wrapper | `scripts/gpresult-wrapper` | CLI over the library; emits JSON to stdout |
+| Wrapper | `src/gpresult-wrapper` | CLI over the library; emits JSON to stdout |
 | Backend config | `backend/gpresult.backend` | Maps D-Bus methods to wrapper commands (alterator-module-executor) |
 | Interface | `interface/*.xml`, `*.policy` | D-Bus introspection + PolicyKit action |
 
