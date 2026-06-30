@@ -81,48 +81,44 @@ def serialize_gpo(gpo):
     }
 
 
-def emit(payload):
+def emit(gpos):
+    # One compact JSON object per line, one line per GPO. alterator-module-executor
+    # (stdout_strings) splits stdout on newlines, so each GPO becomes its own
+    # element in the returned string array -- no outer envelope, no JSON array.
     try:
-        text = json.dumps(payload, ensure_ascii=False, default=str)
+        for gpo in gpos:
+            print(json.dumps(serialize_gpo(gpo), ensure_ascii=False, default=str))
     except (TypeError, ValueError) as exc:
         die(f"failed to serialize policy data: {exc}")
-    sys.stdout.write(text + "\n")
     sys.exit(0)
-
-
-def split_by_scope(gpos):
-    buckets = {"user": [], "machine": []}
-    for gpo in gpos:
-        buckets.setdefault(gpo.obj, []).append(serialize_gpo(gpo))
-    return buckets
 
 
 def cmd_all(_args):
     load_scope("machine")
     load_scope("user")
-    emit({"all": [serialize_gpo(g) for g in GPO.get_all_gpos()]})
+    emit(GPO.get_all_gpos())
 
 
 def cmd_user(_args):
     load_scope("user")
-    emit({"user": [serialize_gpo(g) for g in GPO.get_all_gpos("user")]})
+    emit(GPO.get_all_gpos("user"))
 
 
 def cmd_machine(_args):
     load_scope("machine")
-    emit({"machine": [serialize_gpo(g) for g in GPO.get_all_gpos("machine")]})
+    emit(GPO.get_all_gpos("machine"))
 
 
 def cmd_gpo_by_name(args):
     load_scope("machine")
     load_scope("user")
-    emit(split_by_scope(GPO.get_gpos_by_name(args.name)))
+    emit(GPO.get_gpos_by_name(args.name))
 
 
 def cmd_gpo_by_guid(args):
     load_scope("machine")
     load_scope("user")
-    emit(split_by_scope(GPO.get_gpos_by_guid(args.guid)))
+    emit(GPO.get_gpos_by_guid(args.guid))
 
 
 def build_parser():

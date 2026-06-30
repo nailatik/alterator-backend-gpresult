@@ -38,16 +38,18 @@ admin machine ──(system D-Bus)──▶ alterator-manager ──PolicyKit (a
 - **Object path:** `/org/altlinux/alterator/gpresult`
 - **Interface:** `org.altlinux.alterator.gpresult1`
 
-Every method returns the signature `asasi` — `stdout_strings` (the JSON document),
-`stderr_strings`, and an integer `response` code.
+Every method returns the signature `asasi` — `stdout_strings`, `stderr_strings`,
+and an integer `response` code. For GPO methods each `stdout_strings` element is a
+standalone JSON object describing one GPO (no outer envelope, no wrapping array);
+the scope is carried by each object's own `scope` field.
 
-| Method | In | JSON envelope |
-|--------|----|---------------|
-| `GetAllGPOs` | — | `{"all": [...]}` |
-| `GetUserGPOs` | — | `{"user": [...]}` |
-| `GetMachineGPOs` | — | `{"machine": [...]}` |
-| `GetGPObyName` | `s` name | `{"user": [...], "machine": [...]}` |
-| `GetGPObyGUID` | `s` guid | `{"user": [...], "machine": [...]}` |
+| Method | In | stdout_strings |
+|--------|----|----------------|
+| `GetAllGPOs` | — | one GPO object per element, both scopes |
+| `GetUserGPOs` | — | one GPO object per element, user scope |
+| `GetMachineGPOs` | — | one GPO object per element, machine scope |
+| `GetGPObyName` | `s` name | matching GPO objects, both scopes |
+| `GetGPObyGUID` | `s` guid | matching GPO objects, both scopes |
 | `GetOperationSystemName` | — | OS name from alterator-systeminfo (not GPO JSON) |
 
 Full method/argument documentation: [docs/org.altlinux.alterator.gpresult1.md](./docs/org.altlinux.alterator.gpresult1.md).

@@ -5,7 +5,7 @@
   <interface name="org.altlinux.alterator.gpresult1">
     <doc:summary>Read-only interface exposing Group Policy (gpresult) results over D-Bus.</doc:summary>
     <doc:detail>
-      All GPO-returning methods deliver a JSON document via stdout_strings.
+      Each stdout_strings element is one standalone GPO JSON object (no envelope, no array).
 
       Notes:
       - scope is either "user" or "machine".
@@ -29,7 +29,7 @@
     <method name="GetAllGPOs">
       <doc:summary>Returns all applied GPOs for both machine and user scopes.</doc:summary>
       <arg type="as" name="stdout_strings" direction="out">
-        <doc:summary>JSON envelope: {"all": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+        <doc:summary>One GPO object per element (all scopes). GPO shape defined at interface level.</doc:summary>
       </arg>
       <arg type="as" name="stderr_strings" direction="out"/>
       <arg type="i"  name="response"       direction="out"/>
@@ -38,7 +38,7 @@
     <method name="GetUserGPOs">
       <doc:summary>Returns GPOs applied to the current user scope.</doc:summary>
       <arg type="as" name="stdout_strings" direction="out">
-        <doc:summary>JSON envelope: {"user": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+        <doc:summary>One GPO object per element (user scope). GPO shape defined at interface level.</doc:summary>
       </arg>
       <arg type="as" name="stderr_strings" direction="out"/>
       <arg type="i"  name="response"       direction="out"/>
@@ -47,7 +47,7 @@
     <method name="GetMachineGPOs">
       <doc:summary>Returns GPOs applied to the machine scope.</doc:summary>
       <arg type="as" name="stdout_strings" direction="out">
-        <doc:summary>JSON envelope: {"machine": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+        <doc:summary>One GPO object per element (machine scope). GPO shape defined at interface level.</doc:summary>
       </arg>
       <arg type="as" name="stderr_strings" direction="out"/>
       <arg type="i"  name="response"       direction="out"/>
@@ -56,14 +56,14 @@
     <method name="GetGPObyGUID">
       <doc:summary>Returns GPOs matching the given GUID across both scopes.</doc:summary>
       <doc:detail>
-        Always searches both user and machine scopes; the client selects the relevant
-        scope from the returned envelope keys.
+        Always searches both user and machine scopes; each returned object carries
+        its own "scope" field.
       </doc:detail>
       <arg type="s" name="guid" direction="in">
         <doc:summary>The GPO GUID to search for (e.g. "31B2F340-016D-11D2-945F-00C04FB984F9").</doc:summary>
       </arg>
       <arg type="as" name="stdout_strings" direction="out">
-        <doc:summary>JSON envelope: {"user": [GPO, ...], "machine": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+        <doc:summary>One GPO object per element, both scopes; each carries its own "scope" field. GPO shape defined at interface level.</doc:summary>
       </arg>
       <arg type="as" name="stderr_strings" direction="out"/>
       <arg type="i"  name="response"       direction="out"/>
@@ -77,14 +77,14 @@
         exclude_pkgnames in apt1 -- the executor splits argv on spaces and an
         unquoted multi-word name would be truncated.
 
-        Always searches both user and machine scopes; the client selects the relevant
-        scope from the returned envelope keys.
+        Always searches both user and machine scopes; each returned object carries
+        its own "scope" field.
       </doc:detail>
       <arg type="s" name="name" direction="in">
         <doc:summary>The GPO display name to search for.</doc:summary>
       </arg>
       <arg type="as" name="stdout_strings" direction="out">
-        <doc:summary>JSON envelope: {"user": [GPO, ...], "machine": [GPO, ...]}. GPO shape defined at interface level.</doc:summary>
+        <doc:summary>One GPO object per element, both scopes; each carries its own "scope" field. GPO shape defined at interface level.</doc:summary>
       </arg>
       <arg type="as" name="stderr_strings" direction="out"/>
       <arg type="i"  name="response"       direction="out"/>
