@@ -1,3 +1,7 @@
-scripts/__pycache__
-src/gpresult_backend/__pycache__
-src/gpresult_backend/Preferences/__pycache__
+__pycache__/
+*.py[cod]
+
+
+/build/
+/dist/
+*.egg-info/
