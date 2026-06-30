@@ -20,12 +20,21 @@ class GPO:
     def get_sorted_keys_values(self):
         return sorted(self.keys_values, key=lambda x: x.key)
 
+    @staticmethod
+    def normalize_guid(guid):
+        # GPO GUIDs are stored wrapped in braces;
+        # accept both braced/unbraced and any letter case from the caller.
+        return guid.strip("{}").lower() if guid else guid
+
     @classmethod
     def get_gpos_by_guid(cls, guid, obj=None):
         gpos_res = []
+        guid = cls.normalize_guid(guid)
 
         for gpo in cls.gpos:
-            if gpo.guid == guid and ((obj and gpo.obj == obj) or not obj):
+            if cls.normalize_guid(gpo.guid) == guid and (
+                (obj and gpo.obj == obj) or not obj
+            ):
                 gpos_res.append(gpo)
 
         return gpos_res
