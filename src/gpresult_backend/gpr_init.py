@@ -1,5 +1,5 @@
 import ast
-import gettext
+import sys
 
 import gi
 
@@ -11,10 +11,6 @@ gi.require_version("Gvdb", "1.0")
 gi.require_version("GLib", "2.0")
 
 from gi.repository import GLib, Gvdb  # noqa: E402
-
-gettext.bindtextdomain("gpresult", None)
-gettext.textdomain("gpresult")
-_ = gettext.gettext
 
 policy_fields = [
     "correct_path",
@@ -39,11 +35,11 @@ def init_gpos(path, obj):
         is_not_empty, bytes = GLib.file_get_contents(path)
     except GLib.Error as e:
         if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print(_("Permission denied: {}").format(path))
+            print("Permission denied: {}".format(path), file=sys.stderr)
         elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print(_("No such file: {}").format(path))
+            print("No such file: {}".format(path), file=sys.stderr)
         else:
-            print(e.message)
+            print(e.message, file=sys.stderr)
         exit()
 
     bytes = GLib.Bytes.new(bytes)
@@ -96,11 +92,11 @@ def init_keys_values(path, obj):
         is_not_empty, bytes = GLib.file_get_contents(path)
     except GLib.Error as e:
         if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print(_("Permission denied: {}").format(path))
+            print("Permission denied: {}".format(path), file=sys.stderr)
         elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print(_("No such file: {}").format(path))
+            print("No such file: {}".format(path), file=sys.stderr)
         else:
-            print(e.message)
+            print(e.message, file=sys.stderr)
         exit()
 
     bytes = GLib.Bytes.new(bytes)
@@ -133,11 +129,11 @@ def init_keys_values_meta(path, obj):
         is_not_empty, bytes = GLib.file_get_contents(path)
     except GLib.Error as e:
         if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print(_("Permission denied: {}").format(path))
+            print("Permission denied: {}".format(path), file=sys.stderr)
         elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print(_("No such file: {}").format(path))
+            print("No such file: {}".format(path), file=sys.stderr)
         else:
-            print(e.message)
+            print(e.message, file=sys.stderr)
         exit()
 
     bytes = GLib.Bytes.new(bytes)
@@ -170,11 +166,11 @@ def init_preferences(path, obj):
         is_not_empty, bytes = GLib.file_get_contents(path)
     except GLib.Error as e:
         if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print(_("Permission denied: {}").format(path))
+            print("Permission denied: {}".format(path), file=sys.stderr)
         elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print(_("No such file: {}").format(path))
+            print("No such file: {}".format(path), file=sys.stderr)
         else:
-            print(e.message)
+            print(e.message, file=sys.stderr)
         exit()
 
     bytes = GLib.Bytes.new(bytes)
