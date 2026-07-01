@@ -14,7 +14,7 @@
       - The "password" field is always replaced with "***REDACTED***" before output to prevent GPP credential leakage over the network (cf. MS14-025).
     </doc:detail>
 
-    <method name="GetOperationSystemName">
+    <method name="GetOperatingSystemName">
       <doc:summary>Returns the operating system pretty name.</doc:summary>
       <doc:detail>
         The PRETTY_NAME field of /etc/os-release (falling back to NAME), e.g.

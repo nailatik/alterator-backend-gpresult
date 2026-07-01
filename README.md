@@ -51,7 +51,7 @@ returns `asasasi`, splitting results into separate `user` and `machine` arrays.
 | `GetMachineGPOs` | — | one GPO object per element, machine scope |
 | `GetGPObyName` | `s` name | matching GPO objects, both scopes |
 | `GetGPObyGUID` | `s` guid | matching GPO objects, both scopes |
-| `GetOperationSystemName` | — | OS pretty name from `/etc/os-release` (not GPO JSON) |
+| `GetOperatingSystemName` | — | OS pretty name from `/etc/os-release` (not GPO JSON) |
 
 Full method/argument documentation: [docs/org.altlinux.alterator.gpresult1.md](./docs/org.altlinux.alterator.gpresult1.md).
 
