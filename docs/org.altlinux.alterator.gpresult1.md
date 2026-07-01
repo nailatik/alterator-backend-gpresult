@@ -3,17 +3,20 @@
 Read-only interface exposing Group Policy (gpresult) results over D-Bus.
 
 
-All GPO-returning methods deliver a JSON document via stdout_strings.
+Each stdout_strings element is one standalone GPO JSON object (no envelope, no array).
+GetAllGPOs is the exception: it splits results into separate "user" and "machine" out arguments.
+
+The full GPO JSON object shape (fields, key/value entries, preference attributes)
+is documented in docs/gpo-json-schema.md.
 
 Notes:
-- scope is either "user" or "machine".
 - previous_value (renamed from mod_previous_value) may be null.
 - The "password" field is always replaced with "***REDACTED***" before output to prevent GPP credential leakage over the network (cf. MS14-025).
 
 | Method | Summary |
 |--------|---------|
-| [GetOperationSystemName](#method-GetOperationSystemName) | Returns OS name and system information from the alterator-systeminfo backend. |
-| [GetAllGPOs](#method-GetAllGPOs) | Returns all applied GPOs for both machine and user scopes. |
+| [GetOperatingSystemName](#method-GetOperatingSystemName) | Returns the operating system pretty name. |
+| [GetAllGPOs](#method-GetAllGPOs) | Returns all applied GPOs, split into separate user and machine scopes. |
 | [GetUserGPOs](#method-GetUserGPOs) | Returns GPOs applied to the current user scope. |
 | [GetMachineGPOs](#method-GetMachineGPOs) | Returns GPOs applied to the machine scope. |
 | [GetGPObyGUID](#method-GetGPObyGUID) | Returns GPOs matching the given GUID across both scopes. |
@@ -22,33 +25,37 @@ Notes:
 
 ## Methods
 
-### **GetOperationSystemName**() -> ([stdout_strings](#argument-stdout_strings-of-GetOperationSystemName) : `as`, [stderr_strings](#argument-stderr_strings-of-GetOperationSystemName) : `as`, [response](#argument-response-of-GetOperationSystemName) : `i`)<a id="method-GetOperationSystemName"></a>
+### **GetOperatingSystemName**() -> ([stdout_strings](#argument-stdout_strings-of-GetOperatingSystemName) : `as`, [stderr_strings](#argument-stderr_strings-of-GetOperatingSystemName) : `as`, [response](#argument-response-of-GetOperatingSystemName) : `i`)<a id="method-GetOperatingSystemName"></a>
 
-Returns OS name and system information from the alterator-systeminfo backend.
+Returns the operating system pretty name.
 
 
-Delegates to the external /usr/lib/alterator/backends/systeminfo binary.
-The output is NOT gpresult GPO-JSON; its shape is owned by alterator-systeminfo.
-
-#### Output arguments
-
-##### **stdout_strings** : `as` <a id="argument-stdout_strings-of-GetOperationSystemName"></a>
-
-Raw output from alterator-systeminfo; format is defined by that backend.
-
-##### **stderr_strings** : `as` <a id="argument-stderr_strings-of-GetOperationSystemName"></a>
-
-##### **response** : `i` <a id="argument-response-of-GetOperationSystemName"></a>
-
-### **GetAllGPOs**() -> ([stdout_strings](#argument-stdout_strings-of-GetAllGPOs) : `as`, [stderr_strings](#argument-stderr_strings-of-GetAllGPOs) : `as`, [response](#argument-response-of-GetAllGPOs) : `i`)<a id="method-GetAllGPOs"></a>
-
-Returns all applied GPOs for both machine and user scopes.
+The PRETTY_NAME field of /etc/os-release (falling back to NAME), e.g.
+"ALT Workstation 11.2 (Prometheus)".
 
 #### Output arguments
 
-##### **stdout_strings** : `as` <a id="argument-stdout_strings-of-GetAllGPOs"></a>
+##### **stdout_strings** : `as` <a id="argument-stdout_strings-of-GetOperatingSystemName"></a>
 
-JSON envelope: {"all": [GPO, ...]}. GPO shape defined at interface level.
+One element: the OS pretty name from /etc/os-release.
+
+##### **stderr_strings** : `as` <a id="argument-stderr_strings-of-GetOperatingSystemName"></a>
+
+##### **response** : `i` <a id="argument-response-of-GetOperatingSystemName"></a>
+
+### **GetAllGPOs**() -> ([user](#argument-user-of-GetAllGPOs) : `as`, [machine](#argument-machine-of-GetAllGPOs) : `as`, [stderr_strings](#argument-stderr_strings-of-GetAllGPOs) : `as`, [response](#argument-response-of-GetAllGPOs) : `i`)<a id="method-GetAllGPOs"></a>
+
+Returns all applied GPOs, split into separate user and machine scopes.
+
+#### Output arguments
+
+##### **user** : `as` <a id="argument-user-of-GetAllGPOs"></a>
+
+One GPO object per element (user scope). GPO shape: see docs/gpo-json-schema.md.
+
+##### **machine** : `as` <a id="argument-machine-of-GetAllGPOs"></a>
+
+One GPO object per element (machine scope). GPO shape: see docs/gpo-json-schema.md.
 
 ##### **stderr_strings** : `as` <a id="argument-stderr_strings-of-GetAllGPOs"></a>
 
@@ -62,7 +69,7 @@ Returns GPOs applied to the current user scope.
 
 ##### **stdout_strings** : `as` <a id="argument-stdout_strings-of-GetUserGPOs"></a>
 
-JSON envelope: {"user": [GPO, ...]}. GPO shape defined at interface level.
+One GPO object per element (user scope). GPO shape: see docs/gpo-json-schema.md.
 
 ##### **stderr_strings** : `as` <a id="argument-stderr_strings-of-GetUserGPOs"></a>
 
@@ -76,7 +83,7 @@ Returns GPOs applied to the machine scope.
 
 ##### **stdout_strings** : `as` <a id="argument-stdout_strings-of-GetMachineGPOs"></a>
 
-JSON envelope: {"machine": [GPO, ...]}. GPO shape defined at interface level.
+One GPO object per element (machine scope). GPO shape: see docs/gpo-json-schema.md.
 
 ##### **stderr_strings** : `as` <a id="argument-stderr_strings-of-GetMachineGPOs"></a>
 
@@ -87,8 +94,7 @@ JSON envelope: {"machine": [GPO, ...]}. GPO shape defined at interface level.
 Returns GPOs matching the given GUID across both scopes.
 
 
-Always searches both user and machine scopes; the client selects the relevant
-scope from the returned envelope keys.
+Always searches both user and machine scopes.
 
 #### Input arguments
 
@@ -100,7 +106,7 @@ The GPO GUID to search for (e.g. "31B2F340-016D-11D2-945F-00C04FB984F9").
 
 ##### **stdout_strings** : `as` <a id="argument-stdout_strings-of-GetGPObyGUID"></a>
 
-JSON envelope: {"user": [GPO, ...], "machine": [GPO, ...]}. GPO shape defined at interface level.
+One GPO object per element, from both scopes. GPO shape: see docs/gpo-json-schema.md.
 
 ##### **stderr_strings** : `as` <a id="argument-stderr_strings-of-GetGPObyGUID"></a>
 
@@ -116,8 +122,7 @@ The caller MUST quote name values
 exclude_pkgnames in apt1 -- the executor splits argv on spaces and an
 unquoted multi-word name would be truncated.
 
-Always searches both user and machine scopes; the client selects the relevant
-scope from the returned envelope keys.
+Always searches both user and machine scopes.
 
 #### Input arguments
 
@@ -129,7 +134,7 @@ The GPO display name to search for.
 
 ##### **stdout_strings** : `as` <a id="argument-stdout_strings-of-GetGPObyName"></a>
 
-JSON envelope: {"user": [GPO, ...], "machine": [GPO, ...]}. GPO shape defined at interface level.
+One GPO object per element, from both scopes. GPO shape: see docs/gpo-json-schema.md.
 
 ##### **stderr_strings** : `as` <a id="argument-stderr_strings-of-GetGPObyName"></a>
 
