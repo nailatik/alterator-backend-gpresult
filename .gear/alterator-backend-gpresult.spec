@@ -18,7 +18,6 @@ Requires: python3-module-%mod_name = %EVR
 Requires: alterator-interface-gpresult = %EVR
 Requires: alterator-module-executor >= 0.1.29
 Requires: alterator-manager
-Requires: alterator-backend-systeminfo-utils
 
 BuildRequires(pre): rpm-build-pyproject rpm-macros-alterator
 BuildRequires: python3-devel

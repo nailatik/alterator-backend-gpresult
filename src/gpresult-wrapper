@@ -6,6 +6,7 @@ import contextlib
 import io
 import json
 import os
+import platform
 import sys
 
 from gpresult_backend import gpr_init, gpr_system
@@ -116,6 +117,19 @@ def emit_json(payload):
     sys.exit(0)
 
 
+def get_os_name():
+    try:
+        release = platform.freedesktop_os_release()
+    except OSError as exc:
+        die(f"failed to read os-release: {exc}")
+    return release.get("PRETTY_NAME") or release.get("NAME", "")
+
+
+def cmd_os_name(_args):
+    print(get_os_name())
+    sys.exit(0)
+
+
 def cmd_all(_args):
     load_scope("machine")
     load_scope("user")
@@ -154,6 +168,7 @@ def build_parser():
     sub.add_parser("all", help="all GPOs, both scopes").set_defaults(func=cmd_all)
     sub.add_parser("user", help="user-scope GPOs").set_defaults(func=cmd_user)
     sub.add_parser("machine", help="machine-scope GPOs").set_defaults(func=cmd_machine)
+    sub.add_parser("os_name", help="operating system pretty name").set_defaults(func=cmd_os_name)
 
     by_name = sub.add_parser("gpo_by_name", help="GPOs matching a policy name")
     by_name.add_argument("name")

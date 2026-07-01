@@ -4,7 +4,7 @@ name      = "gpresult"
 interface = "gpresult1"
 
 [methods.GetOperationSystemName]
-execute            = "/usr/lib/alterator/backends/systeminfo os-name"
+execute            = "/usr/lib/alterator/backends/gpresult-wrapper os_name"
 exit_status        = true
 action_id          = "Read"
 stdout_strings     = true

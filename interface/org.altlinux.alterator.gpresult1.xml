@@ -15,13 +15,13 @@
     </doc:detail>
 
     <method name="GetOperationSystemName">
-      <doc:summary>Returns OS name and system information from the alterator-systeminfo backend.</doc:summary>
+      <doc:summary>Returns the operating system pretty name.</doc:summary>
       <doc:detail>
-        Delegates to the external /usr/lib/alterator/backends/systeminfo binary.
-        The output is NOT gpresult GPO-JSON; its shape is owned by alterator-systeminfo.
+        The PRETTY_NAME field of /etc/os-release (falling back to NAME), e.g.
+        "ALT Workstation 11.2 (Prometheus)".
       </doc:detail>
       <arg type="as" name="stdout_strings" direction="out">
-        <doc:summary>Raw output from alterator-systeminfo; format is defined by that backend.</doc:summary>
+        <doc:summary>One element: the OS pretty name from /etc/os-release.</doc:summary>
       </arg>
       <arg type="as" name="stderr_strings" direction="out"/>
       <arg type="i"  name="response"       direction="out"/>
