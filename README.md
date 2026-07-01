@@ -38,14 +38,15 @@ admin machine ──(system D-Bus)──▶ alterator-manager ──PolicyKit (a
 - **Object path:** `/org/altlinux/alterator/gpresult`
 - **Interface:** `org.altlinux.alterator.gpresult1`
 
-Every method returns the signature `asasi` — `stdout_strings`, `stderr_strings`,
-and an integer `response` code. For GPO methods each `stdout_strings` element is a
-standalone JSON object describing one GPO (no outer envelope, no wrapping array);
-the scope is carried by each object's own `scope` field.
+Most methods return the signature `asasi` — `stdout_strings`, `stderr_strings`,
+and an integer `response` code. Each `stdout_strings` element is a standalone JSON
+object describing one GPO (no outer envelope, no wrapping array); the scope is
+carried by each object's own `scope` field. `GetAllGPOs` is the exception: it
+returns `asasasi`, splitting results into separate `user` and `machine` arrays.
 
-| Method | In | stdout_strings |
-|--------|----|----------------|
-| `GetAllGPOs` | — | one GPO object per element, both scopes |
+| Method | In | Out |
+|--------|----|-----|
+| `GetAllGPOs` | — | `user` + `machine` arrays, one GPO object per element |
 | `GetUserGPOs` | — | one GPO object per element, user scope |
 | `GetMachineGPOs` | — | one GPO object per element, machine scope |
 | `GetGPObyName` | `s` name | matching GPO objects, both scopes |
