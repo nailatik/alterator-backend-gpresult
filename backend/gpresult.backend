@@ -15,7 +15,7 @@ environment.LC_ALL = {}
 execute            = "/usr/lib/alterator/backends/gpresult-wrapper all"
 exit_status        = true
 action_id          = "Read"
-stdout_strings     = true
+stdout_json        = ["user[]", "machine[]"]
 stderr_strings     = true
 environment.LC_ALL = {}
 

@@ -6,6 +6,7 @@
     <doc:summary>Read-only interface exposing Group Policy (gpresult) results over D-Bus.</doc:summary>
     <doc:detail>
       Each stdout_strings element is one standalone GPO JSON object (no envelope, no array).
+      GetAllGPOs is the exception: it splits results into separate "user" and "machine" out arguments.
 
       Notes:
       - scope is either "user" or "machine".
@@ -27,9 +28,12 @@
     </method>
 
     <method name="GetAllGPOs">
-      <doc:summary>Returns all applied GPOs for both machine and user scopes.</doc:summary>
-      <arg type="as" name="stdout_strings" direction="out">
-        <doc:summary>One GPO object per element (all scopes). GPO shape defined at interface level.</doc:summary>
+      <doc:summary>Returns all applied GPOs, split into separate user and machine scopes.</doc:summary>
+      <arg type="as" name="user" direction="out">
+        <doc:summary>One GPO object per element (user scope). GPO shape defined at interface level.</doc:summary>
+      </arg>
+      <arg type="as" name="machine" direction="out">
+        <doc:summary>One GPO object per element (machine scope). GPO shape defined at interface level.</doc:summary>
       </arg>
       <arg type="as" name="stderr_strings" direction="out"/>
       <arg type="i"  name="response"       direction="out"/>

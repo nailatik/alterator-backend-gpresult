@@ -80,6 +80,17 @@ def serialize_gpo(gpo):
         "preferences": [serialize_preference(p) for p in gpo.preferences],
     }
 
+def split_by_scope(gpos):
+    # alterator-module-executor's stdout_json extracts json[key] and expects a
+    # LIST OF STRINGS (keys declared "user[]"/"machine[]" in the .backend), so each
+    # GPO is serialized to its own JSON string here; the client json.loads each one.
+    buckets = {"user": [], "machine": []}
+    for gpo in gpos:
+        buckets.setdefault(gpo.obj, []).append(
+            json.dumps(serialize_gpo(gpo), ensure_ascii=False, default=str)
+        )
+    return buckets
+
 
 def emit(gpos):
     # One compact JSON object per line, one line per GPO. alterator-module-executor
@@ -93,10 +104,22 @@ def emit(gpos):
     sys.exit(0)
 
 
+def emit_json(payload):
+    # Single JSON document on stdout. GetAllGPOs uses the executor's stdout_json
+    # mode, which parses the whole stdout as one JSON value, so all GPOs are
+    # returned grouped by scope: {"user": [...], "machine": [...]}.
+    try:
+        text = json.dumps(payload, ensure_ascii=False, default=str)
+    except (TypeError, ValueError) as exc:
+        die(f"failed to serialize policy data: {exc}")
+    sys.stdout.write(text + "\n")
+    sys.exit(0)
+
+
 def cmd_all(_args):
     load_scope("machine")
     load_scope("user")
-    emit(GPO.get_all_gpos())
+    emit_json(split_by_scope(GPO.get_all_gpos()))
 
 
 def cmd_user(_args):
