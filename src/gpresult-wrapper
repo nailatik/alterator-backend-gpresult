@@ -76,7 +76,6 @@ def serialize_gpo(gpo):
         "name": gpo.name,
         "path": gpo.path,
         "version": gpo.version,
-        "scope": gpo.obj,
         "keys": [serialize_keyvalue(kv) for kv in gpo.get_sorted_keys_values()],
         "preferences": [serialize_preference(p) for p in gpo.preferences],
     }
