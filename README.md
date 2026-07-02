@@ -5,8 +5,7 @@
 [![Platform](https://img.shields.io/badge/platform-ALTLinux-yellow.svg)](https://en.altlinux.org/ALT)
 
 `alterator-backend-gpresult` exposes Group Policy results (`gpresult`) over D-Bus,
-letting a domain administrator query the GPOs applied on **any** domain machine
-without explicit SSH access. Authentication and authorization are handled by
+letting a domain administrator query the GPOs applied on **any** domain machine. Authentication and authorization are handled by
 [alterator-manager](https://altlinux.space/alterator/alterator-manager) and PolicyKit.
 
 It reads the local GVDB policy database (`/etc/dconf/db/policy<UID>`), which is
