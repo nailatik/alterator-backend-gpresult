@@ -25,10 +25,10 @@ JSON over the [`gpresult1`](./docs/org.altlinux.alterator.gpresult1.md) D-Bus in
 
 ```
 admin machine ──(system D-Bus)──▶ alterator-manager ──PolicyKit (action "Read")──▶ gpresult-wrapper
-                                                                                           │
-                                                                        /etc/dconf/db/policy* (GVDB)
-                                                                                           ▼
-                                                                                          JSON
+                                          ▲                                                │
+                                          │                                    /etc/dconf/db/policy* (GVDB)
+                                          │                                                ▼
+                                          └────────────────────────────────────────────── JSON
 ```
 
 ## D-Bus interface
