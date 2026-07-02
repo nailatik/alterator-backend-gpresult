@@ -24,11 +24,11 @@ JSON over the [`gpresult1`](./docs/org.altlinux.alterator.gpresult1.md) D-Bus in
 ### Data flow
 
 ```
-admin machine ──(system D-Bus)──▶ alterator-manager ──▶ gpresult-wrapper
-                                          ▲                     │
-                                          │         /etc/dconf/db/policy* (GVDB)
-                                          │                     ▼
-                                          └───────────────────── JSON
+admin machine ──(session D-Bus)──▶ alterator-manager ──▶ gpresult-wrapper
+                                           ▲                     │
+                                           │         /etc/dconf/db/policy* (GVDB)
+                                           │                     ▼
+                                           └───────────────────── JSON
 ```
 
 ## D-Bus interface
@@ -65,14 +65,14 @@ sudo apt-get install alterator-backend-gpresult
 All applied GPOs for the machine scope:
 
 ```bash
-busctl --system call org.altlinux.alterator /org/altlinux/alterator/gpresult \
+busctl --user call org.altlinux.alterator /org/altlinux/alterator/gpresult \
     org.altlinux.alterator.gpresult1 GetMachineGPOs
 ```
 
 Look up a GPO by GUID (braces and letter case are optional):
 
 ```bash
-busctl --system call org.altlinux.alterator /org/altlinux/alterator/gpresult \
+busctl --user call org.altlinux.alterator /org/altlinux/alterator/gpresult \
     org.altlinux.alterator.gpresult1 GetGPObyGUID s '{3D925F92-80AD-4D95-BD94-CAE6987863F8}'
 ```
 
@@ -80,7 +80,7 @@ Look up a GPO by display name. Multi-word names **must** be quoted inside the
 argument, otherwise the executor splits them on spaces:
 
 ```bash
-busctl --system call org.altlinux.alterator /org/altlinux/alterator/gpresult \
+busctl --user call org.altlinux.alterator /org/altlinux/alterator/gpresult \
     org.altlinux.alterator.gpresult1 GetGPObyName s '"Power policy"'
 ```
 

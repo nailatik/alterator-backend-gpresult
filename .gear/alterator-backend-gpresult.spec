@@ -56,14 +56,14 @@ mkdir -p %buildroot%_datadir/dbus-1/interfaces
 install -p -m 644 interface/*.xml %buildroot%_datadir/dbus-1/interfaces/
 mkdir -p %buildroot%_alterator_libdir/backends
 install -p -m 755 src/gpresult-wrapper %buildroot%_alterator_libdir/backends/
-mkdir -p %buildroot%_alterator_datadir/backends
-install -p -m 644 backend/gpresult.backend %buildroot%_alterator_datadir/backends/
+mkdir -p %buildroot%_alterator_datadir/backends/user
+install -p -m 644 backend/gpresult.backend %buildroot%_alterator_datadir/backends/user/
 %pyproject_install
 
 %files
 %doc LICENSE.md
 %_alterator_libdir/backends/gpresult-wrapper
-%_alterator_datadir/backends/gpresult.backend
+%_alterator_datadir/backends/user/gpresult.backend
 
 %files -n alterator-interface-gpresult
 %_datadir/dbus-1/interfaces/org.altlinux.alterator.gpresult1.xml
