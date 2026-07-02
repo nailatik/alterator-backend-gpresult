@@ -80,6 +80,9 @@ def init_gpos(path, obj):
                         cur_key = prefix + "/" + f
                         cur_value = Gvdb.Table.get_value(table, cur_key)
 
+                        if cur_value is None:
+                            continue
+
                         if cur_value.get_type().equal(GLib.VariantType.new("s")):
                             keys_gpo[f] = cur_value.get_string()
                         elif cur_value.get_type().equal(GLib.VariantType.new("i")):
