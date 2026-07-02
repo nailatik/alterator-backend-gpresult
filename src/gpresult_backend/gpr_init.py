@@ -42,14 +42,8 @@ def _read_policy_file(path):
         raise BackendError(e.message, ExitCode.IO_ERROR)
 
 
-def init_gpos(path, obj):
-    is_not_empty, bytes = _read_policy_file(path)
-
-    bytes = GLib.Bytes.new(bytes)
-
-    if is_not_empty:
-        table = Gvdb.Table.new_from_bytes(bytes, True)
-
+def init_gpos(table, obj):
+    if table is not None:
         key_list = Gvdb.Table.get_names(table)
 
         for k in key_list:
@@ -93,14 +87,8 @@ def init_gpos(path, obj):
                     GPO(obj, **keys_gpo)
 
 
-def init_keys_values(path, obj):
-    is_not_empty, bytes = _read_policy_file(path)
-
-    bytes = GLib.Bytes.new(bytes)
-
-    if is_not_empty:
-        table = Gvdb.Table.new_from_bytes(bytes, True)
-
+def init_keys_values(table, obj):
+    if table is not None:
         key_list = Gvdb.Table.get_names(table)
 
         for k in key_list:
@@ -121,14 +109,8 @@ def init_keys_values(path, obj):
                 # TODO: Add deletion of viewed records
 
 
-def init_keys_values_meta(path, obj):
-    is_not_empty, bytes = _read_policy_file(path)
-
-    bytes = GLib.Bytes.new(bytes)
-
-    if is_not_empty:
-        table = Gvdb.Table.new_from_bytes(bytes, True)
-
+def init_keys_values_meta(table, obj):
+    if table is not None:
         key_list = Gvdb.Table.get_names(table)
 
         for k in key_list:
@@ -149,14 +131,8 @@ def init_keys_values_meta(path, obj):
                 # TODO: Add deletion of viewed records
 
 
-def init_preferences(path, obj):
-    is_not_empty, bytes = _read_policy_file(path)
-
-    bytes = GLib.Bytes.new(bytes)
-
-    if is_not_empty:
-        table = Gvdb.Table.new_from_bytes(bytes, True)
-
+def init_preferences(table, obj):
+    if table is not None:
         key_list = Gvdb.Table.get_names(table)
 
         for k in key_list:
@@ -184,10 +160,15 @@ def reset_state():
 
 
 def init_data(path, obj):
-    init_gpos(path, obj)
-    init_keys_values(path, obj)
-    init_keys_values_meta(path, obj)
-    init_preferences(path, obj)
+    is_not_empty, bytes = _read_policy_file(path)
+    table = None
+    if is_not_empty:
+        table = Gvdb.Table.new_from_bytes(GLib.Bytes.new(bytes), True)
+
+    init_gpos(table, obj)
+    init_keys_values(table, obj)
+    init_keys_values_meta(table, obj)
+    init_preferences(table, obj)
 
     for kv in KeyValue.get_all_keys_values(obj):
         GPO.set_keys_values(kv)
