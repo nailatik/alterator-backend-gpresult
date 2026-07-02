@@ -12,6 +12,7 @@ import sys
 from gpresult_backend import gpr_init, gpr_system
 from gpresult_backend.errors import BackendError, ExitCode
 from gpresult_backend.GPO import GPO
+from gpresult_backend.validators import validate_guid, validate_name
 
 REDACT_SENSITIVE = True
 SENSITIVE_ATTRS = ("password",)
@@ -145,12 +146,14 @@ def cmd_machine(_args):
 
 
 def cmd_gpo_by_name(args):
+    validate_name(args.name)
     load_scope("machine")
     load_scope("user")
     emit(GPO.get_gpos_by_name(args.name))
 
 
 def cmd_gpo_by_guid(args):
+    validate_guid(args.guid)
     load_scope("machine")
     load_scope("user")
     emit(GPO.get_gpos_by_guid(args.guid))
