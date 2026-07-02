@@ -1,8 +1,8 @@
 import ast
-import sys
 
 import gi
 
+from .errors import BackendError, ExitCode
 from .GPO import GPO
 from .KeyValue import KeyValue
 from .Preferences.Preference import Preference
@@ -30,17 +30,20 @@ preference_fields = [
 ]
 
 
-def init_gpos(path, obj):
+def _read_policy_file(path):
+    """Read a GVDB policy file, mapping I/O failures to a BackendError."""
     try:
-        is_not_empty, bytes = GLib.file_get_contents(path)
+        return GLib.file_get_contents(path)
     except GLib.Error as e:
         if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print("Permission denied: {}".format(path), file=sys.stderr)
-        elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print("No such file: {}".format(path), file=sys.stderr)
-        else:
-            print(e.message, file=sys.stderr)
-        exit()
+            raise BackendError(f"Permission denied: {path}", ExitCode.NO_PERMISSION)
+        if e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
+            raise BackendError(f"No such file: {path}", ExitCode.NO_INPUT)
+        raise BackendError(e.message, ExitCode.IO_ERROR)
+
+
+def init_gpos(path, obj):
+    is_not_empty, bytes = _read_policy_file(path)
 
     bytes = GLib.Bytes.new(bytes)
 
@@ -88,16 +91,7 @@ def init_gpos(path, obj):
 
 
 def init_keys_values(path, obj):
-    try:
-        is_not_empty, bytes = GLib.file_get_contents(path)
-    except GLib.Error as e:
-        if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print("Permission denied: {}".format(path), file=sys.stderr)
-        elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print("No such file: {}".format(path), file=sys.stderr)
-        else:
-            print(e.message, file=sys.stderr)
-        exit()
+    is_not_empty, bytes = _read_policy_file(path)
 
     bytes = GLib.Bytes.new(bytes)
 
@@ -125,16 +119,7 @@ def init_keys_values(path, obj):
 
 
 def init_keys_values_meta(path, obj):
-    try:
-        is_not_empty, bytes = GLib.file_get_contents(path)
-    except GLib.Error as e:
-        if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print("Permission denied: {}".format(path), file=sys.stderr)
-        elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print("No such file: {}".format(path), file=sys.stderr)
-        else:
-            print(e.message, file=sys.stderr)
-        exit()
+    is_not_empty, bytes = _read_policy_file(path)
 
     bytes = GLib.Bytes.new(bytes)
 
@@ -162,16 +147,7 @@ def init_keys_values_meta(path, obj):
 
 
 def init_preferences(path, obj):
-    try:
-        is_not_empty, bytes = GLib.file_get_contents(path)
-    except GLib.Error as e:
-        if e.matches(GLib.file_error_quark(), GLib.FileError.ACCES):
-            print("Permission denied: {}".format(path), file=sys.stderr)
-        elif e.matches(GLib.file_error_quark(), GLib.FileError.NOENT):
-            print("No such file: {}".format(path), file=sys.stderr)
-        else:
-            print(e.message, file=sys.stderr)
-        exit()
+    is_not_empty, bytes = _read_policy_file(path)
 
     bytes = GLib.Bytes.new(bytes)
 

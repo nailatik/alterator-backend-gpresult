@@ -38,7 +38,7 @@ admin machine ──(system D-Bus)──▶ alterator-manager ──PolicyKit (a
 - **Interface:** `org.altlinux.alterator.gpresult1`
 
 Most methods return the signature `asasi` — `stdout_strings`, `stderr_strings`,
-and an integer `response` code. Each `stdout_strings` element is a standalone JSON
+and an integer `response` code ([exit codes](./docs/exit-codes.md)). Each `stdout_strings` element is a standalone JSON
 object describing one GPO (no outer envelope, no wrapping array); the scope is
 carried by each object's own `scope` field. `GetAllGPOs` is the exception: it
 returns `asasasi`, splitting results into separate `user` and `machine` arrays.

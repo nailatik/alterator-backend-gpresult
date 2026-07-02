@@ -10,6 +10,7 @@ import platform
 import sys
 
 from gpresult_backend import gpr_init, gpr_system
+from gpresult_backend.errors import BackendError, ExitCode
 from gpresult_backend.GPO import GPO
 
 REDACT_SENSITIVE = True
@@ -18,7 +19,7 @@ SENSITIVE_ATTRS = ("password",)
 PROG = "gpresult-wrapper"
 
 
-def die(message, code=1):
+def die(message, code=ExitCode.SOFTWARE_ERROR):
     text = (message or "unknown error").strip()
     print(f"{PROG}: {text}", file=sys.stderr)
     sys.exit(code)
@@ -30,18 +31,15 @@ def load_scope(obj):
     else:
         path = gpr_system.get_path_to_policy()
 
+    # Guard stdout: the library must not print onto the channel we emit JSON on.
+    # Read/parse failures raise BackendError, which propagates up to main().
     buf = io.StringIO()
-    try:
-        with contextlib.redirect_stdout(buf):
-            gpr_init.init_data(path, obj)
-    except SystemExit:
-        die(buf.getvalue() or f"failed to read policy database for '{obj}'")
-    except Exception as exc:  # noqa: BLE001 - surface any read/parse failure
-        die(f"failed to read policy database for '{obj}': {exc}")
+    with contextlib.redirect_stdout(buf):
+        gpr_init.init_data(path, obj)
 
     leaked = buf.getvalue().strip()
     if leaked:
-        die(leaked)
+        raise BackendError(leaked, ExitCode.SOFTWARE_ERROR)
 
 
 def serialize_keyvalue(kv):
@@ -101,7 +99,7 @@ def emit(gpos):
         for gpo in gpos:
             print(json.dumps(serialize_gpo(gpo), ensure_ascii=False, default=str))
     except (TypeError, ValueError) as exc:
-        die(f"failed to serialize policy data: {exc}")
+        raise BackendError(f"failed to serialize policy data: {exc}", ExitCode.SOFTWARE_ERROR)
     sys.exit(0)
 
 
@@ -112,7 +110,7 @@ def emit_json(payload):
     try:
         text = json.dumps(payload, ensure_ascii=False, default=str)
     except (TypeError, ValueError) as exc:
-        die(f"failed to serialize policy data: {exc}")
+        raise BackendError(f"failed to serialize policy data: {exc}", ExitCode.SOFTWARE_ERROR)
     sys.stdout.write(text + "\n")
     sys.exit(0)
 
@@ -121,7 +119,7 @@ def get_os_name():
     try:
         release = platform.freedesktop_os_release()
     except OSError as exc:
-        die(f"failed to read os-release: {exc}")
+        raise BackendError(f"failed to read os-release: {exc}", ExitCode.IO_ERROR)
     return release.get("PRETTY_NAME") or release.get("NAME", "")
 
 
@@ -185,8 +183,10 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     try:
         args.func(args)
+    except BackendError as exc:
+        die(str(exc), exc.code)
     except Exception as exc:  # noqa: BLE001 - never spew a traceback onto the bus
-        die(f"unexpected error: {exc}")
+        die(f"unexpected error: {exc}", ExitCode.SOFTWARE_ERROR)
 
 
 if __name__ == "__main__":
