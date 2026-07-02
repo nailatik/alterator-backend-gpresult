@@ -60,6 +60,7 @@ def serialize_preference(pref):
     attributes = {}
     if inner is not None:
         attributes = dict(vars(inner))
+        # Legacy: not removed yet, kept for backward compatibility
         if REDACT_SENSITIVE:
             for name in SENSITIVE_ATTRS:
                 if attributes.get(name) is not None:
