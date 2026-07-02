@@ -5,8 +5,8 @@
 [![Platform](https://img.shields.io/badge/platform-ALTLinux-yellow.svg)](https://en.altlinux.org/ALT)
 
 `alterator-backend-gpresult` exposes Group Policy results (`gpresult`) over D-Bus,
-letting a domain administrator query the GPOs applied on **any** domain machine. Authentication and authorization are handled by
-[alterator-manager](https://altlinux.space/alterator/alterator-manager) and PolicyKit.
+letting a domain administrator query the GPOs applied on **any** domain machine. Requests are mediated by
+[alterator-manager](https://altlinux.space/alterator/alterator-manager) over D-Bus.
 
 It reads the local GVDB policy database (`/etc/dconf/db/policy<UID>`), which is
 populated by [`gpupdate`](https://github.com/altlinux/gpupdate), and serves it as
@@ -19,16 +19,16 @@ JSON over the [`gpresult1`](./docs/org.altlinux.alterator.gpresult1.md) D-Bus in
 | Python library | `src/gpresult_backend/` | Reads GVDB, builds GPO/KeyValue/Preference objects |
 | Wrapper | `src/gpresult-wrapper` | CLI over the library; emits JSON to stdout |
 | Backend config | `backend/gpresult.backend` | Maps D-Bus methods to wrapper commands (alterator-module-executor) |
-| Interface | `interface/*.xml`, `*.policy` | D-Bus introspection + PolicyKit action |
+| Interface | `interface/*.xml` | D-Bus introspection |
 
 ### Data flow
 
 ```
-admin machine ──(system D-Bus)──▶ alterator-manager ──PolicyKit (action "Read")──▶ gpresult-wrapper
-                                          ▲                                                │
-                                          │                                    /etc/dconf/db/policy* (GVDB)
-                                          │                                                ▼
-                                          └────────────────────────────────────────────── JSON
+admin machine ──(system D-Bus)──▶ alterator-manager ──▶ gpresult-wrapper
+                                          ▲                     │
+                                          │         /etc/dconf/db/policy* (GVDB)
+                                          │                     ▼
+                                          └───────────────────── JSON
 ```
 
 ## D-Bus interface
@@ -39,9 +39,9 @@ admin machine ──(system D-Bus)──▶ alterator-manager ──PolicyKit (a
 
 Most methods return the signature `asasi` — `stdout_strings`, `stderr_strings`,
 and an integer `response` code ([exit codes](./docs/exit-codes.md)). Each `stdout_strings` element is a standalone JSON
-object describing one GPO (no outer envelope, no wrapping array); the scope is
-carried by each object's own `scope` field. `GetAllGPOs` is the exception: it
-returns `asasasi`, splitting results into separate `user` and `machine` arrays.
+object describing one GPO (no outer envelope, no wrapping array). `GetAllGPOs` is
+the exception: it returns `asasasi`, splitting results into separate `user` and
+`machine` arrays — the only method that distinguishes user from machine scope.
 
 | Method | In | Out |
 |--------|----|-----|

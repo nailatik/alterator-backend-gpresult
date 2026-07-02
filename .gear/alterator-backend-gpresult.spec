@@ -28,7 +28,7 @@ Summary: Alterator D-Bus interface for gpresult
 Group: System/Configuration/Other
 
 %description -n alterator-interface-gpresult
-D-Bus introspection XML and PolicyKit action for the gpresult1 interface.
+D-Bus introspection XML for the gpresult1 interface.
 
 %package -n python3-module-%mod_name
 Summary: Python library for reading Group Policy results
@@ -52,8 +52,6 @@ Group Policy data from dconf GVDB databases.
 %pyproject_build
 
 %install
-mkdir -p %buildroot%_datadir/polkit-1/actions
-install -p -m 644 interface/*.policy %buildroot%_datadir/polkit-1/actions/
 mkdir -p %buildroot%_datadir/dbus-1/interfaces
 install -p -m 644 interface/*.xml %buildroot%_datadir/dbus-1/interfaces/
 mkdir -p %buildroot%_alterator_libdir/backends
@@ -69,7 +67,6 @@ install -p -m 644 backend/gpresult.backend %buildroot%_alterator_datadir/backend
 
 %files -n alterator-interface-gpresult
 %_datadir/dbus-1/interfaces/org.altlinux.alterator.gpresult1.xml
-%_datadir/polkit-1/actions/org.altlinux.alterator.gpresult1.policy
 
 %files -n python3-module-%mod_name
 %python3_sitelibdir/%mod_name/
