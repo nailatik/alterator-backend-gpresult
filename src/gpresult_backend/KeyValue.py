@@ -21,6 +21,10 @@ class KeyValue:
         KeyValue.keys_values.append(self)
 
     @classmethod
+    def clear(cls):
+        cls.keys_values.clear()
+
+    @classmethod
     def set_meta_to_key_value(cls, key, obj, **kwargs):
         for kv in cls.keys_values:
             if kv.key == key and kv.obj == obj:

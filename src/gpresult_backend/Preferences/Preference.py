@@ -41,3 +41,14 @@ class Preference:
     @classmethod
     def clear_preferences(cls):
         cls.preferences.clear()
+
+    @classmethod
+    def clear_all(cls):
+        cls.preferences.clear()
+        Drive.drives.clear()
+        EnvVar.envvars.clear()
+        File.files.clear()
+        Folder.folders.clear()
+        Inifile.inifiles.clear()
+        NetworkShare.nshares.clear()
+        Shortcut.shortcuts.clear()

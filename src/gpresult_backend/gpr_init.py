@@ -177,6 +177,12 @@ def init_preferences(path, obj):
                     Preference(obj, preference_type, **pref)
 
 
+def reset_state():
+    GPO.clear()
+    KeyValue.clear()
+    Preference.clear_all()
+
+
 def init_data(path, obj):
     init_gpos(path, obj)
     init_keys_values(path, obj)

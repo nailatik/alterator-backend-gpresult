@@ -75,6 +75,10 @@ class GPO:
         cls.gpos.append(gpo)
 
     @classmethod
+    def clear(cls):
+        cls.gpos.clear()
+
+    @classmethod
     def get_all_gpos(cls, obj=None):
         if not obj:
             return cls.gpos

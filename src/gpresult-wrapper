@@ -181,6 +181,7 @@ def build_parser():
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
+    gpr_init.reset_state()
     try:
         args.func(args)
     except BackendError as exc:
